@@ -31,7 +31,7 @@ print('Efficiency tests with m={}'.format(m))
 # For this list and for the recorded times, no need to use numpy's arrays.
 nSet = [2,5,10,20,50,100]
 # Python is cool.
-[na,cl,su,po] = [[0]*len(nSet) for i in range(4)]
+na,cl,su,po = [[0]*len(nSet) for i in range(4)]
 
 # Will ignore warnings from polyfit. In practice it is a bad idea to use higher
 # order polynomial interpolations. And possibly even worse to ignore warnings.
