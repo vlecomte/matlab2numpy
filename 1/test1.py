@@ -13,11 +13,9 @@ X = linspace(0,5,n+1)
 # Operators on arrays are element-by-element operators by default.
 U = 1 / (X+1)
 
-# This is approximately the minimum value to avoid division by zero. The
-# behaviour is not exactly well defined, so it's not just spacing(1).
-eps = spacing(10)
-x = linspace(eps,5-eps,m)
-uh = lagrange_polyfit(x,X,U)
+# We remove sigular points (points near X).
+x = remove_near(linspace(0,5,m), X)
+uh = lagrange_super(x,X,U)
 
 # The plot function works pretty much like its MATLAB equivalent. However, it
 # blocks the execution until the window is closed.
@@ -31,24 +29,34 @@ show()
 print('Efficiency tests with m={}'.format(m))
 
 nSet = [2,5,10,20,50,100]
-na = zeros(shape(nSet))
-cl = zeros(shape(nSet))
-su = zeros(shape(nSet))
-po = zeros(shape(nSet))
+# This is basically laziness, but list comprehensions are cool.
+[na,cl,su,po] = [zeros(shape(nSet)) for i in range(4)]
+
+# Will ignore warnings from polyfit. In practice it is a bad idea to use higher
+# order polynomial interpolations. And possibly even worse to ignore warnings.
+warnings.simplefilter('ignore', RankWarning)
+# Calls all functions so that loading the function into memory will not have an
+# influence on the running time.
+call_all()
 
 for i,n in enumerate(nSet):
     X = linspace(0,10,n+1)
     print('  Order of interpolation is {}'.format(n))
     
-    # Function wrapper to measure execution time
+    # Function wrapper to measure execution time. It copies function arguments
+    # and hands them to the given function.
     def tictoc(f, *args):
         start = clock()
         f(*args)
         end = clock()
         return end-start
     
-    x = linspace(eps,10-eps,m)
+    # Again, we remove singular points.
+    x = remove_near(linspace(0,10,m), X)
     U = 1 / (X+1)
+    
+    # Benchmarking every version. The naive version is too slow to be run above
+    # degree 20.
     if n <= 20:
         na[i] = tictoc(lagrange_naive, x,X,U)
         print('    Naive lagrange:   {:.3f}'.format(na[i]))
@@ -59,6 +67,8 @@ for i,n in enumerate(nSet):
     po[i] = tictoc(lagrange_polyfit, x,X,U)
     print('    Polyfit lagrange: {:.3f}'.format(po[i]))
 
+# A log-log plot will be more readable, and complexities of the form O(C*n^k)
+# will appear as lines.
 loglog(nSet,na,'.-r', nSet,cl,'.-b', nSet,su,'.-g', nSet,po,'.-k')
 xlabel('Order of interpolation')
 ylabel('CPU time (s)')
