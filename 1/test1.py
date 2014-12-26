@@ -1,8 +1,8 @@
 from numpy import *
 from matplotlib.pyplot import *
-from time import clock
 
 from lagrange import *
+from util import *
 
 # ==========================
 #  1. Simple execution test
@@ -28,9 +28,10 @@ show()
 # ==============================
 print('Efficiency tests with m={}'.format(m))
 
+# For this list and for the recorded times, no need to use numpy's arrays.
 nSet = [2,5,10,20,50,100]
-# This is basically laziness, but list comprehensions are cool.
-[na,cl,su,po] = [zeros(shape(nSet)) for i in range(4)]
+# Python is cool.
+[na,cl,su,po] = [[0]*len(nSet) for i in range(4)]
 
 # Will ignore warnings from polyfit. In practice it is a bad idea to use higher
 # order polynomial interpolations. And possibly even worse to ignore warnings.
@@ -42,14 +43,6 @@ call_all()
 for i,n in enumerate(nSet):
     X = linspace(0,10,n+1)
     print('  Order of interpolation is {}'.format(n))
-    
-    # Function wrapper to measure execution time. It copies function arguments
-    # and hands them to the given function.
-    def tictoc(f, *args):
-        start = clock()
-        f(*args)
-        end = clock()
-        return end-start
     
     # Again, we remove singular points.
     x = remove_near(linspace(0,10,m), X)

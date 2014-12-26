@@ -54,23 +54,3 @@ def lagrange_polyfit(x,X,U):
     # Those functions are used the same way as in MATLAB.
     p = polyfit(X,U,len(X))
     return polyval(p,x)
-
-# ===================
-#  Utility functions
-# ===================
-
-def remove_near(x,X, eps=spacing(1)):
-    x_n1, X_1m = meshgrid(x,X)
-    # We only take x where it is farther than eps from all elements of X.
-    return x[abs(x_n1-X_1m).min(0) > eps]
-
-def call_all():
-    # Calling all the functions so that they are already loaded in memory when
-    # we benchmark them.
-    x = array([])
-    X = array([0,1])
-    U = array([0,1])
-    lagrange_naive(x,X,U)
-    lagrange_clever(x,X,U)
-    lagrange_super(x,X,U)
-    lagrange_polyfit(x,X,U)
